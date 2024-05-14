@@ -1,0 +1,57 @@
+<div class="note-form">
+  <h2>{{ selectedNote ? "Modify" : "Add" }} Note</h2>
+  <div class="form-group">
+    <label for="apiKey">API Key:</label>
+    <input
+      type="text"
+      id="apiKey"
+      name="apiKey"
+      [(ngModel)]="apiKey"
+      required
+    />
+  </div>
+  <button (click)="identify()">Identify</button>
+  <form (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="title">Title:</label>
+      <input
+        type="text"
+        id="title"
+        name="title"
+        [(ngModel)]="formData.title"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label for="description">Description:</label>
+      <textarea
+        id="description"
+        name="description"
+        [(ngModel)]="formData.description"
+        required
+      ></textarea>
+    </div>
+    <button type="submit">{{ selectedNote ? "Modify" : "Add" }}</button>
+  </form>
+</div>
+
+<table class="custom-table">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let item of data">
+      <td>{{ item.title }}</td>
+      <td>{{ item.description }}</td>
+      <td>
+        <button class="btn-delete" (click)="deleteItem(item.id)">Delete</button>
+        <button class="btn-modify" (click)="openModifyForm(item)">
+          Modify
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>

@@ -14,7 +14,7 @@ This is a full-stack application built with .NET Core API 8 for the backend and 
 
 The API server should now be running on `https://localhost:7107/swagger/index.html`.
 
-### Frontend (Angular Standalone Component)
+### Frontend
 1. Navigate to the `frontend` directory.
 2. Run `npm install` to install dependencies.
 3. Run `ng serve -o` to start the Angular development server.

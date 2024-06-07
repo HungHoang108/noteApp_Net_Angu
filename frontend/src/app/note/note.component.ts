@@ -9,6 +9,8 @@ import { FormsModule } from '@angular/forms';
 import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { Note } from '../models/note';
+import { NoteService } from '../../../services/note.service';
+import { error } from 'console';
 
 @Component({
   selector: 'app-note',
@@ -18,6 +20,8 @@ import { Note } from '../models/note';
   styleUrl: './note.component.css',
 })
 export class NoteComponent implements OnInit {
+  constructor(private service: NoteService) {}
+
   formData: Note = new Note();
   selectedNote: Note | null = null;
   data: Note[] = [];
@@ -29,25 +33,23 @@ export class NoteComponent implements OnInit {
   baseURL = 'https://localhost:7107/api/v1/Notes';
   httpClient = inject(HttpClient);
 
+  private headers: HttpHeaders = new HttpHeaders();
+
   identify() {
+    this.service.identify(this.apiKey);
     this.fetchData();
   }
 
   fetchData() {
-    const headers = new HttpHeaders().set('x-api-key', this.apiKey);
-    this.httpClient
-      .get(`${this.baseURL}/`, { headers })
-      .subscribe((data: any) => {
-        this.data = data.sort((a: any, b: any) => a.id - b.id);
-        console.log(data);
-      });
+    this.service.getNotes().subscribe((data: any) => {
+      this.data = data.sort((a: any, b: any) => a.id - b.id);
+      console.log(data);
+    });
   }
 
-  deleteItem(id: any) {
-    const headers = new HttpHeaders().set('x-api-key', this.apiKey);
-
-    this.httpClient
-      .delete(`${this.baseURL}/${id}`, { headers })
+  deleteItem(id: number | undefined) {
+    this.service
+      .deleteItem(id)
       .pipe(
         catchError((error) => {
           console.error('Error deleting item:', error);
@@ -66,13 +68,12 @@ export class NoteComponent implements OnInit {
   }
 
   onSubmit() {
-    const headers = new HttpHeaders().set('x-api-key', this.apiKey);
     if (this.selectedNote) {
       this.httpClient
         .patch(
           `https://localhost:7107/api/v1/Notes/${this.selectedNote.id}`,
           this.formData,
-          { headers }
+          { headers: this.headers }
         )
         .subscribe(() => {
           this.fetchData();
@@ -80,7 +81,9 @@ export class NoteComponent implements OnInit {
         });
     } else {
       this.httpClient
-        .post('https://localhost:7107/api/v1/Notes', this.formData, { headers })
+        .post('https://localhost:7107/api/v1/Notes', this.formData, {
+          headers: this.headers,
+        })
         .subscribe(() => {
           this.fetchData();
           this.resetForm();

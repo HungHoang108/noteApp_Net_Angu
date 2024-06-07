@@ -11,23 +11,16 @@
     />
   </div>
   <button (click)="identify()">Identify</button>
-  <form (ngSubmit)="onSubmit()">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="form-group">
       <label for="title">Title:</label>
-      <input
-        type="text"
-        id="title"
-        name="title"
-        [(ngModel)]="formData.title"
-        required
-      />
+      <input type="text" id="title" formControlName="title" required />
     </div>
     <div class="form-group">
       <label for="description">Description:</label>
       <textarea
         id="description"
-        name="description"
-        [(ngModel)]="formData.description"
+        formControlName="description"
         required
       ></textarea>
     </div>

@@ -5,24 +5,30 @@ import {
   HttpHeaders,
 } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { Note } from '../models/note';
 import { NoteService } from '../../../services/note.service';
-import { error } from 'console';
+import { FormBuilder } from '@angular/forms';
 
 @Component({
   selector: 'app-note',
   standalone: true,
-  imports: [HttpClientModule, CommonModule, FormsModule],
+  imports: [HttpClientModule, CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './note.component.html',
   styleUrl: './note.component.css',
 })
 export class NoteComponent implements OnInit {
-  constructor(private service: NoteService) {}
+  form: FormGroup;
 
-  formData: Note = new Note();
+  constructor(private service: NoteService, private fb: FormBuilder) {
+    this.form = this.fb.group({
+      title: [''],
+      description: [''],
+    });
+  }
+
   selectedNote: Note | null = null;
   data: Note[] = [];
 
@@ -64,7 +70,7 @@ export class NoteComponent implements OnInit {
 
   openModifyForm(note: Note) {
     this.selectedNote = note;
-    this.formData = { title: note.title, description: note.description };
+    this.form.patchValue(note);
   }
 
   onSubmit() {
@@ -72,7 +78,7 @@ export class NoteComponent implements OnInit {
       this.httpClient
         .patch(
           `https://localhost:7107/api/v1/Notes/${this.selectedNote.id}`,
-          this.formData,
+          this.form.value,
           { headers: this.headers }
         )
         .subscribe(() => {
@@ -80,19 +86,15 @@ export class NoteComponent implements OnInit {
           this.resetForm();
         });
     } else {
-      this.httpClient
-        .post('https://localhost:7107/api/v1/Notes', this.formData, {
-          headers: this.headers,
-        })
-        .subscribe(() => {
-          this.fetchData();
-          this.resetForm();
-        });
+      this.service.addNote(this.form.value).subscribe(() => {
+        this.fetchData();
+        this.resetForm();
+      });
     }
   }
 
   resetForm() {
     this.selectedNote = null;
-    this.formData = new Note();
+    this.form.reset();
   }
 }
